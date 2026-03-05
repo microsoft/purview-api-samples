@@ -84,6 +84,29 @@ cd "<path-to-repo>\Foundry"
 .\EnableFoundryPurview.ps1
 ```
 
+#### Optional Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `-Output <directory>` | Write detailed results to a timestamped text file in the specified directory. If omitted and the subscription count exceeds 50, a results file is automatically created in the current directory to avoid flooding the terminal. |
+| `-FilterOpenAiSubscriptions` | Only process subscriptions that contain Azure OpenAI resources (`Microsoft.CognitiveServices/accounts` with `kind eq 'OpenAI'`). Subscriptions without OpenAI resources are excluded before any Purview checks. |
+
+**Examples:**
+
+```powershell
+# Default — check all subscriptions
+.\EnableFoundryPurview.ps1
+
+# Only subscriptions with OpenAI resources
+.\EnableFoundryPurview.ps1 -FilterOpenAiSubscriptions
+
+# Write results to a specific directory
+.\EnableFoundryPurview.ps1 -Output "C:\Reports"
+
+# Combine both
+.\EnableFoundryPurview.ps1 -FilterOpenAiSubscriptions -Output "C:\Reports"
+```
+
 ### Step 4 — Authenticate
 
 A browser window (or device-code prompt) will appear for Azure sign-in via `Connect-AzAccount`. Sign in with an account that has the required permissions.
@@ -140,3 +163,4 @@ Follow the prompts to enable/disable Purview as needed. After the operation comp
 |-----|-------------|---------------|
 | Azure Resource Manager — Subscriptions | `2025-04-01` | [List Subscriptions](https://learn.microsoft.com/rest/api/resources/subscriptions/list) |
 | Cognitive Services — RAI Policy | `2025-10-01-preview` | [Cognitive Services REST API](https://learn.microsoft.com/rest/api/cognitiveservices/) |
+| Azure Resource Graph | `2021-03-01` | [Resource Graph REST API](https://learn.microsoft.com/rest/api/azureresourcegraph/resourcegraph(v2021-03-01)/resources/resources) |
