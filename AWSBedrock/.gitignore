@@ -1,0 +1,11 @@
+node_modules/
+__pycache__/
+*.pyc
+.env
+dist/
+build/
+.venv/
+*.egg-info/
+.aws-sam/
+packaged.yaml
+lambda/package/
