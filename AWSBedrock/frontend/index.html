@@ -1,0 +1,34 @@
+<!--
+    TODO: MSAL.js single-page chat UI for the expense approval agent.
+
+    Wiring checklist:
+    - Replace the placeholders below with your Entra tenant ID, app
+      (client) ID, and your deployed API Gateway invoke URL.
+    - The app registration must list this page's origin under
+      "Single-page application" redirect URIs.
+    - Request the API scope exposed by the same app registration (for
+      example "api://<client-id>/access_as_user").
+    - On submit, POST to `${API_BASE}/chat` with:
+          Authorization: Bearer <access_token>
+          Content-Type: application/json
+          { "prompt": "...", "userId": account.username }
+    - Render the JSON response: show `answer` plus a Purview verdict
+      badge built from `purview.prompt` / `purview.response`. When the
+      backend returns 403 with `blocked: true`, show the block reason
+      and the masked snippet instead of an answer.
+
+    Reference UI: see
+    ../../HRPolicyAgent/HRPolicyAgent-Unified-Current/frontend/index.html
+    in the parent demo workspace for a working layout you can adapt.
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Expense Approval Agent (Bedrock + Purview)</title>
+  </head>
+  <body>
+    <h1>Expense Approval Agent</h1>
+    <p>Replace this file with your MSAL.js chat UI.</p>
+  </body>
+</html>
