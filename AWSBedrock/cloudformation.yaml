@@ -1,0 +1,161 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: BedrockExpenseAgent - Lambda + API Gateway with Purview SDK middleware
+
+Parameters:
+  LambdaCodeBucket:
+    Type: String
+    Description: S3 bucket holding the lambda_package.zip deployment artifact
+  BedrockModelId:
+    Type: String
+    Default: us.amazon.nova-2-lite-v1:0
+  SecretArn:
+    Type: String
+    Description: ARN of the Secrets Manager secret containing the Entra client secret
+  TenantId:
+    Type: String
+    Description: Microsoft Entra tenant ID
+  ClientId:
+    Type: String
+    Description: Microsoft Entra application (client) ID
+
+Resources:
+
+  # ── IAM Role for Lambda ────────────────────────────────────────────
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: bedrock-expense-agent-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaBasicExecution
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref SecretArn
+        - PolicyName: BedrockInvokeAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                Resource: !Sub arn:aws:bedrock:us-east-1::foundation-model/${BedrockModelId}
+
+  # ── Lambda Function ────────────────────────────────────────────────
+  AgentLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: BedrockExpenseAgent
+      Runtime: python3.12
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 120
+      MemorySize: 512
+      Environment:
+        Variables:
+          AWS_REGION_OVERRIDE: us-east-1
+          BEDROCK_MODEL_ID: !Ref BedrockModelId
+          TENANT_ID: !Ref TenantId
+          CLIENT_ID: !Ref ClientId
+      Code:
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: lambda/lambda_package.zip
+
+  # ── API Gateway (REST) ────────────────────────────────────────────
+  AgentApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: BedrockExpenseAgent-API
+      Description: API Gateway for BedrockExpenseAgent with Purview middleware
+
+  AgentResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref AgentApi
+      ParentId: !GetAtt AgentApi.RootResourceId
+      PathPart: agent
+
+  ChatResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref AgentApi
+      ParentId: !Ref AgentResource
+      PathPart: chat
+
+  # POST /agent/chat
+  ChatPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref AgentApi
+      ResourceId: !Ref ChatResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${AgentLambdaFunction.Arn}/invocations
+
+  # OPTIONS /agent/chat (CORS preflight)
+  ChatOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref AgentApi
+      ResourceId: !Ref ChatResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${AgentLambdaFunction.Arn}/invocations
+
+  # Lambda permission for API Gateway
+  ApiGatewayLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AgentLambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:us-east-1:${AWS::AccountId}:${AgentApi}/*
+
+  # Deploy the API
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - ChatPostMethod
+      - ChatOptionsMethod
+    Properties:
+      RestApiId: !Ref AgentApi
+
+  ApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref AgentApi
+      DeploymentId: !Ref ApiDeployment
+      StageName: demo
+
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub https://${AgentApi}.execute-api.us-east-1.amazonaws.com/demo/agent/chat
+  LambdaFunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt AgentLambdaFunction.Arn

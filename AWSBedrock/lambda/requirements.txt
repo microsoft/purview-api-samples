@@ -1,0 +1,3 @@
+agent-framework-core
+agent-framework-purview
+azure-identity
