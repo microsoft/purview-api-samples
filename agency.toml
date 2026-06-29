@@ -1,0 +1,55 @@
+# agency.toml — machine-readable context for microsoft/purview-api-samples
+# This repo is a multi-sample collection (no single buildable service).
+# See AGENTS.md for the human-readable router.
+
+[repo]
+name = "purview-api-samples"
+owner = "microsoft"
+description = "Samples for calling the Microsoft Purview APIs in Microsoft Graph for data security, compliance, and governance."
+kind = "multi-sample-collection"
+default_branch = "main"
+
+[readiness]
+dashboard_org = "dscgp"
+tier_target = "baseline_ready"
+source_skill = "npf-readiness-adopt"
+
+[verify]
+# Repo-level verify loop. No CI is configured for this repo.
+command = "pwsh ./scripts/verify.ps1"
+docs = "docs/build-and-test.md"
+
+[[samples]]
+name = "AWSBedrock"
+path = "AWSBedrock"
+stack = ["python", "aws-lambda", "cloudformation", "browser-msal"]
+entry_points = ["AWSBedrock/lambda/lambda_function.py", "AWSBedrock/frontend/serve.py"]
+readme = "AWSBedrock/README.md"
+
+[[samples]]
+name = "DLPforCustomAIApps"
+path = "DLPforCustomAIApps"
+stack = ["powershell"]
+entry_points = ["DLPforCustomAIApps/Create-DlpPolicyForCustomAIApps.ps1"]
+readme = "DLPforCustomAIApps/README.md"
+
+[[samples]]
+name = "Foundry"
+path = "Foundry"
+stack = ["powershell", "az.accounts"]
+entry_points = ["Foundry/EnableFoundryPurview.ps1"]
+readme = "Foundry/README.md"
+
+[[samples]]
+name = "Postman Collection"
+path = "Postman Collection"
+stack = ["postman", "json"]
+entry_points = ["Postman Collection/DSPM4AI_API_postman_collection.json"]
+readme = "Postman Collection/README.MD"
+
+[[samples]]
+name = "dotnet/Desktop"
+path = "dotnet/Desktop"
+stack = ["dotnet", "net8.0-windows", "wpf"]
+entry_points = ["dotnet/Desktop/Purview API Explorer.sln"]
+readme = "dotnet/Desktop/README.MD"
