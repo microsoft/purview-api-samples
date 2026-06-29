@@ -149,7 +149,6 @@ if ($EnableDlpPolicy) {
             @{ Setting = "UploadText"; Value = "Block" },
             @{ Setting = "DownloadText"; Value = "Block" }
         )
-        StopPolicyProcessing = $true
         Comment = "Blocks prompts and responses containing common sensitive information types in custom AI apps."
     }
 

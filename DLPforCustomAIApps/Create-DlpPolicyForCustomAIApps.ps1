@@ -157,7 +157,6 @@ $ruleParams = @{
         @{ Setting = "UploadText";   Value = $RestrictAction },
         @{ Setting = "DownloadText"; Value = $RestrictAction }
     )
-    StopPolicyProcessing                = $true
     Comment                             = "Blocks prompts and responses containing the listed sensitive information types."
 }
 
