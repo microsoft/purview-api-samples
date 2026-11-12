@@ -49,7 +49,12 @@ function Write-Output-Line {
 function Get-Token {
     $t = Get-AzAccessToken -ResourceUrl "https://management.azure.com/"
     if ($t.Token -is [securestring]) {
-        [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($t.Token))
+        $ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($t.Token)
+        try {
+            [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
+        } finally {
+            [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr)
+        }
     } else { $t.Token }
 }
 

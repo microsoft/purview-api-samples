@@ -34,6 +34,9 @@ The **EnableFoundryPurview.ps1** script is an interactive PowerShell tool that c
 
 - **Windows PowerShell 5.1** or **PowerShell 7+** (cross-platform).
 
+Token acquisition supports both secure and plain-text tokens from `Az.Accounts`
+on Windows, Linux, and macOS.
+
 ### 2. Azure PowerShell Module — `Az.Accounts`
 
 The script imports `Az.Accounts` for authentication and token acquisition. Install it if you haven't already:
@@ -147,6 +150,14 @@ Follow the prompts to enable/disable Purview as needed. After the operation comp
 ---
 
 ## Troubleshooting
+
+Run the offline token-conversion regression check from the repository root:
+
+```powershell
+pwsh ./Foundry/tests/Get-Token.Tests.ps1
+```
+
+The check uses synthetic tokens and does not sign in or call Azure.
 
 | Symptom | Likely Cause | Resolution |
 |---------|-------------|------------|
