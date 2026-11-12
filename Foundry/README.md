@@ -34,9 +34,6 @@ The **EnableFoundryPurview.ps1** script is an interactive PowerShell tool that c
 
 - **Windows PowerShell 5.1** or **PowerShell 7+** (cross-platform).
 
-Token acquisition supports both secure and plain-text tokens from `Az.Accounts`
-on Windows, Linux, and macOS.
-
 ### 2. Azure PowerShell Module — `Az.Accounts`
 
 The script imports `Az.Accounts` for authentication and token acquisition. Install it if you haven't already:
