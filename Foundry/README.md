@@ -148,6 +148,14 @@ Follow the prompts to enable/disable Purview as needed. After the operation comp
 
 ## Troubleshooting
 
+Run the offline token-conversion regression check from the repository root:
+
+```powershell
+pwsh ./Foundry/tests/Get-Token.Tests.ps1
+```
+
+The check uses synthetic tokens and does not sign in or call Azure.
+
 | Symptom | Likely Cause | Resolution |
 |---------|-------------|------------|
 | `Import-Module Az.Accounts` fails | Module not installed | Run `Install-Module Az.Accounts -Scope CurrentUser` |
